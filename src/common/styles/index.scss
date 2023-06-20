@@ -1,0 +1,95 @@
+askray-ui {
+   .chatHistory {
+      padding: var(--spacer-3, 0.5rem);
+      padding-bottom: unset;
+      margin-bottom: var(--spacer-3, 0.5rem);
+      border-color: #e7e7ed;
+      border-color: var(--gray-300, #e7e7ed);
+      border-width: 1px;
+      border-style: solid;
+      overflow: auto;
+      width: 100%;
+      min-width: 400px;
+      min-height: 100px;
+   }
+
+   .conversation {
+      color: #fff;
+      border-radius: var(--border-radius, .25rem);
+      max-width: 250px;
+      border-width: 1px;
+      border-style: solid;
+      padding: var(--spacer-2, 0.5rem);
+      margin-bottom: var(--spacer-2, 0.5rem);
+      clear: both;
+
+      .message-header {
+         display: block;
+         font-weight: var(--font-weight-bold, bold);
+      }
+
+      .message-body {
+         display: inline;
+      }
+   }
+
+   .conversation:last-of-type {
+      margin-bottom: var(--spacer-3, 1rem);
+   }
+
+   .conversation-query {
+      background-color: #868e96;
+      background-color: var(--upper-header-background, #868e96);
+      border-color: #212529;
+      border-color: var(--upper-header-background, #212529);
+      float: left;
+   }
+
+   .conversation-response {
+      background-color: #e95959;
+      background-color: var(--primary, #e95959);
+      border-color: #d05050;
+      border-color: var(--primary, #d05050);
+      float: right;
+   }
+
+   .conversation-search-results {
+      margin-bottom: var(--spacer-2, 0.5rem);
+      float: right;
+      clear: both;
+   }
+
+   .conversation-button {
+      margin-bottom: var(--spacer-2, 0.5rem);
+      float: right;
+      clear: both;
+   }
+
+   .button-container {
+      display: flex;
+      justify-content: flex-end;
+      align-items: baseline;
+      padding-top: var(--spacer-3, 1rem);
+      column-gap: var(--spacer-2, 0.5rem);
+   }
+
+   .ray-container {
+      position: fixed;
+      right: 200px;
+      bottom: 20px;
+      background: #fff;
+      max-width: 450px;
+      max-height: 700px;
+      z-index: 9000000;
+      padding: 15px;
+      border-radius: 10px;
+      border: solid lightgrey;
+      overflow: auto;
+   }
+
+   .ray-button {
+      position: fixed !important;
+      bottom: 50px;
+      right: 45px;
+   }
+}
