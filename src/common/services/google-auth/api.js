@@ -14,14 +14,12 @@
 
 import { Liferay } from '../liferay/liferay';
 
-const { REACT_APP_GOOGLE_AUTH_HOST } = process.env;
-
-const googleAuth = async (userAgentApplicationId) => {
+const googleAuth = async (googleAuthEndpoint, userAgentApplicationId) => {
   const oauth2Client = Liferay.OAuth2Client.FromUserAgentApplication(
     userAgentApplicationId
   );
   return oauth2Client
-    .fetch(REACT_APP_GOOGLE_AUTH_HOST)
+    .fetch(googleAuthEndpoint)
     .then((json) => json.accessToken);
 };
 

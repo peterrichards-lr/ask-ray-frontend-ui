@@ -27,10 +27,11 @@ class WebComponent extends HTMLElement {
   connectedCallback() {
     this.root.render(
       <AskRay
+        siteUrl={this.getAttribute('site-url')}
         dialogflowProjectId={this.getAttribute('dialogflow-project-id')}
         objectEndpoint={this.getAttribute('object-endpoint')}
         oauth2ClientErc={this.getAttribute('oauth2-client-erc')}
-        siteUrl={this.getAttribute('site-url')}
+        backendAuthEndpoint={this.getAttribute('backend-auth-endpoint')}
         maxEntires={this.getAttribute('max-entries')}
       />
     );

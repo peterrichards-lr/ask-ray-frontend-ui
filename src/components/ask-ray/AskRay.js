@@ -22,12 +22,15 @@ import { SESSION_STORAGE_KEY } from '../../common/const';
 import googleAuth from '../../common/services/google-auth/api';
 import Chatbot from '../chatbot/Chatbot';
 
+const { REACT_APP_BACKEND_AUTH_HOST } = process.env;
+
 const AskRay = (props) => {
   const {
     siteUrl,
     dialogflowProjectId,
     objectEndpoint,
     oauth2ClientErc,
+    backendAuthEndpoint,
     maxEntries,
   } = props;
 
@@ -91,7 +94,8 @@ const AskRay = (props) => {
       return;
     }
 
-    googleAuth(oauth2ClientErc).then((accessToken) => {
+    const endpoint = backendAuthEndpoint || REACT_APP_BACKEND_AUTH_HOST;
+    googleAuth(endpoint, oauth2ClientErc).then((accessToken) => {
       setDialogflowAccessToken(accessToken);
     });
   }, [configured, oauth2ClientErc, sessionId]);
