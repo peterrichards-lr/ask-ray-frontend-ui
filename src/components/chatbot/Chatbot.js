@@ -316,6 +316,7 @@ const Chatbot = (props) => {
               displayType="info"
               spritemap={Liferay.Icons.spritemap}
               title="Info"
+              style={{ marginBottom: 0 }}
             >
               You are at the start of this conversation
             </ClayAlert>

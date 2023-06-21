@@ -11,25 +11,53 @@
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
  * details.
  */
+import { useState, useEffect } from 'react';
 
 import ClayIcon, { ClayIconSpriteContext } from '@clayui/icon';
+import ClayAlert from '@clayui/alert';
 
 import { Liferay } from '../../common/services/liferay/liferay';
 import { buildSessionId } from '../../common/utility';
 import { SESSION_STORAGE_KEY } from '../../common/const';
 import googleAuth from '../../common/services/google-auth/api';
 import Chatbot from '../chatbot/Chatbot';
-import { useState, useEffect } from 'react';
 
 const AskRay = (props) => {
-  const { siteUrl, dialogflowProjectId, objectEndpoint, oauth2ClientErc, maxEntries } =
-    props;
+  const {
+    siteUrl,
+    dialogflowProjectId,
+    objectEndpoint,
+    oauth2ClientErc,
+    maxEntries,
+  } = props;
 
   const actualUrl = siteUrl ? siteUrl : '';
 
   const [dialogflowAccessToken, setDialogflowAccessToken] = useState();
   const [showChatbot, setShowChatbot] = useState();
   const [sessionId, setSessionId] = useState();
+  const [configured, setConfigured] = useState(true);
+
+  if (configured && !dialogflowProjectId) {
+    console.warn(
+      'Ask Ray is not configured. Please supply the dialogflow-project-id attribute to client extension properties.'
+    );
+    setConfigured(false);
+  }
+
+  if (configured && !objectEndpoint) {
+    console.warn(
+      'Ask Ray is not configured. Please supply the object-endpoint attribute to client extension properties.'
+    );
+    setConfigured(false);
+  }
+
+  if (configured && !oauth2ClientErc) {
+    console.warn(
+      'Ask Ray is not configured. Please supply the oauth2-client-erc attribute to client extension properties.'
+    );
+    setConfigured(false);
+  }
 
   console.debug('dialogflowProjectId', dialogflowProjectId);
   console.debug('objectEndpoint', objectEndpoint);
@@ -56,23 +84,38 @@ const AskRay = (props) => {
     if (!sessionId) {
       setSessionId(getSessionId());
     }
-  }, [signedIn, sessionId]);
+  }, [configured, signedIn, sessionId]);
 
   useEffect(() => {
-    if (!sessionId) {
+    if (!configured || !sessionId) {
       return;
     }
 
     googleAuth(oauth2ClientErc).then((accessToken) => {
       setDialogflowAccessToken(accessToken);
     });
-  }, [oauth2ClientErc, sessionId]);
+  }, [configured, oauth2ClientErc, sessionId]);
 
   const onClick = () => setShowChatbot(!showChatbot);
 
-  return (
-    <>
-      {signedIn && sessionId ? (
+  const inPageEditor = () =>
+    document.body.classList.contains('has-edit-mode-menu');
+
+  const RayContainer = () => {
+    if (signedIn && sessionId) {
+      if (inPageEditor()) {
+        return (
+          <ClayAlert
+            displayType="info"
+            spritemap={Liferay.Icons.spritemap}
+            title="Ready"
+            style={{ marginBottom: 0 }}
+          >
+            Ask Ray has been configured and will render on the published page.
+          </ClayAlert>
+        );
+      }
+      return (
         <>
           <button onClick={onClick} className="btn btn-primary ray-button">
             <ClayIconSpriteContext.Provider value={Liferay.Icons.spritemap}>
@@ -93,7 +136,24 @@ const AskRay = (props) => {
             />
           </div>
         </>
-      ) : null}
+      );
+    }
+  };
+
+  return (
+    <>
+      {configured ? (
+        <RayContainer />
+      ) : (
+        <ClayAlert
+          displayType="warning"
+          spritemap={Liferay.Icons.spritemap}
+          title="Configuration Required"
+          style={{ marginBottom: 0 }}
+        >
+          You need to configure the Ask Ray chatbot.
+        </ClayAlert>
+      )}
     </>
   );
 };
