@@ -20,8 +20,10 @@ const SORT_ASCENDING = 'asc';
 const SORT_DESCENDING = 'desc';
 const DIALOGFLOW_LANGUAGE_CODE = 'en-UK';
 const SPEECH_VOICE = 'Google UK English Male';
-const SORT_FIELD = 'id';
+const CHAT_SORT_FIELD = 'id';
+const FULFILMENT_SORT_FIELD = 'priority';
 const SESSION_ID_FIELD = 'sessionId';
+const INTENT_FIELD = 'intent';
 const SESSION_STORAGE_KEY = 'ask-ray-session-id';
 const FLATTEN_PARAM = 'flatten';
 const SEARCH_PARAM = 'search';
@@ -35,8 +37,10 @@ export {
   SORT_DESCENDING,
   DIALOGFLOW_LANGUAGE_CODE,
   SPEECH_VOICE,
-  SORT_FIELD,
+  CHAT_SORT_FIELD,
+  FULFILMENT_SORT_FIELD,
   SESSION_ID_FIELD,
+  INTENT_FIELD,
   SESSION_STORAGE_KEY,
   FLATTEN_PARAM,
   SEARCH_PARAM,

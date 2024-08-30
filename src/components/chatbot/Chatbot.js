@@ -21,7 +21,9 @@ import {
   recordQuery,
   recordResponse,
   callDialogflow,
-  performLiferaySearch,
+  performAssetLibraryLiferaySearch,
+  performSiteLevelLiferaySearch,
+  retrieveIntentFulfilment
 } from './ChatbotApi';
 
 import { SPEECH_VOICE, DIALOGFLOW_LANGUAGE_CODE } from '../../common/const';
@@ -34,8 +36,10 @@ const Chatbot = (props) => {
     dialogflowProjectId,
     dialogflowAccessToken,
     dialogflowSessionId,
-    objectEndpoint,
+    transcriptEndpoint,
+    intentFulfilmentEndpoint,
     maxEntries,
+    assetLibraryId
   } = props;
 
   const chatWindowEnd = useRef(null);
@@ -49,7 +53,7 @@ const Chatbot = (props) => {
   const { register, handleSubmit } = useForm();
 
   useEffect(() => {
-    recentConversationApi(objectEndpoint, dialogflowSessionId, maxEntries)
+    recentConversationApi(transcriptEndpoint, dialogflowSessionId, maxEntries)
       .then((response) => {
         const { items, pageSize, totalCount } = response;
         if (items === undefined || !(items instanceof Array)) {
@@ -71,7 +75,7 @@ const Chatbot = (props) => {
         setMessageSent(false);
       })
       .catch((reason) => console.error(reason));
-  }, [objectEndpoint, messageSent]);
+  }, [transcriptEndpoint, messageSent]);
 
   const onSubmit = (data, event) => {
     setSearchObjectArray([]);
@@ -85,7 +89,7 @@ const Chatbot = (props) => {
   };
 
   const processQuery = (data) => {
-    recordQuery(objectEndpoint, dialogflowSessionId, data.query)
+    recordQuery(transcriptEndpoint, dialogflowSessionId, data.query)
       .then(() => {
         setMessageSent(true);
       })
@@ -98,7 +102,7 @@ const Chatbot = (props) => {
     )
       .then(function (response) {
         const queryResult = response.queryResult;
-        recordResponse(objectEndpoint, dialogflowSessionId, queryResult);
+        recordResponse(transcriptEndpoint, dialogflowSessionId, queryResult);
         setMessageSent(true);
 
         if (queryResult.fulfillmentMessages) {
@@ -109,7 +113,8 @@ const Chatbot = (props) => {
           if (fulfillmentMessageCount > 0) {
             if (voiceQuery) {
               const text = fulfillmentMessages['0'].text.text['0'];
-              speakResult(text);
+              if (text)
+                speakResult(text);
             }
 
             if (fulfillmentMessageCount > 1) {
@@ -123,13 +128,24 @@ const Chatbot = (props) => {
                   return;
                 } else if (payload.search) {
                   console.debug('search', payload.search);
-                  liferaySearch(payload.search);
+                  console.debug('assetLibraryId is set', assetLibraryId !== undefined && assetLibraryId !== null);
+                  var liferaySearchFunction;
+                  if (assetLibraryId !== undefined && assetLibraryId !== null && assetLibraryId > 0) {
+                    console.debug('assetLibraryId', assetLibraryId);
+                    liferaySearchFunction = performAssetLibraryLiferaySearch(payload.search, assetLibraryId);
+                  } else {
+                    liferaySearchFunction = performSiteLevelLiferaySearch(payload.search);
+                  }
+
+                  executeLiferaySearch(liferaySearchFunction);
+                  return;
+                } else if (payload.action) {
+                  console.debug('action', payload.action);
+                  getLink(payload.action);
                   return;
                 }
               }
             }
-            console.debug('action');
-            getLink(queryResult.action);
           }
         }
       })
@@ -171,8 +187,8 @@ const Chatbot = (props) => {
     }
   };
 
-  const liferaySearch = (searchPhrase) => {
-    performLiferaySearch(searchPhrase)
+  const executeLiferaySearch = (liferaySearchFunction) => {
+    liferaySearchFunction
       .then((response) => {
         const { items, pageSize, totalCount } = response;
         let searchObjectArray = [];
@@ -253,12 +269,36 @@ const Chatbot = (props) => {
     if (action === 'blog') {
       return buildSiteUrl('/blogs');
     } else {
-      console.warn('Unkoown action', action);
+      retrieveIntentFulfilment(intentFulfilmentEndpoint, action)
+          .then((response) => {
+            const { items, pageSize, totalCount } = response;
+            if (items === undefined || !(items instanceof Array)) {
+              console.warn('Items is not an array');
+              return;
+            }
+            if (pageSize < totalCount) {
+              console.warn(
+                  `The returned set of items is not the full set: returned ${pageSize}, set size ${totalCount}`
+              );
+            }
+            if (items.length !== pageSize) {
+              console.debug(
+                  `There are fewer items than requested: requested: returned ${items.length}, requested ${pageSize}`
+              );
+            }
+
+            if (items.length == 0) {
+              console.warn('Unknown action', action);
+            } else {
+              console.info('items', items);
+            }
+          })
+          .catch((reason) => console.error(reason));
     }
   };
 
   const RenderSearchResults = () => {
-    const urlString = buildSiteUrl('/-/');
+    const urlString = assetLibraryId ? buildSiteUrl('/w') : buildSiteUrl('/-/');
     return (
       <div className="conversation-search-results">
         {searchObjectArray.map((search, index) => (

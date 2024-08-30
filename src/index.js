@@ -29,10 +29,12 @@ class WebComponent extends HTMLElement {
       <AskRay
         siteUrl={this.getAttribute('site-url')}
         dialogflowProjectId={this.getAttribute('dialogflow-project-id')}
-        objectEndpoint={this.getAttribute('object-endpoint')}
+        transcriptEndpoint={this.getAttribute('transcript-endpoint')}
+        intentFulfilmentEndpoint={this.getAttribute('intent-fulfilment-endpoint')}
         oauth2ClientErc={this.getAttribute('oauth2-client-erc')}
         backendAuthEndpoint={this.getAttribute('backend-auth-endpoint')}
         maxEntires={this.getAttribute('max-entries')}
+        assetLibraryId={this.getAttribute('asset-library-id')}
       />
     );
   }

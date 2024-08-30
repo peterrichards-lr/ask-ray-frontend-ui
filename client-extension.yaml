@@ -1,0 +1,15 @@
+assemble:
+    - from: build/static
+      into: static
+askray-ui:
+    cssURLs:
+        - css/main.*.css
+    friendlyURLMapping: askray-ui
+    htmlElementName: askray-ui
+    instanceable: false
+    name: Ask Ray UI
+    portletCategoryName: category.client-extensions
+    type: customElement
+    urls:
+        - js/main.*.js
+    useESM: true

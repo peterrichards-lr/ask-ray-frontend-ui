@@ -28,10 +28,12 @@ const AskRay = (props) => {
   const {
     siteUrl,
     dialogflowProjectId,
-    objectEndpoint,
+    transcriptEndpoint,
+    intentFulfilmentEndpoint,
     oauth2ClientErc,
     backendAuthEndpoint,
     maxEntries,
+    assetLibraryId
   } = props;
 
   const actualUrl = siteUrl ? siteUrl : '';
@@ -48,9 +50,16 @@ const AskRay = (props) => {
     setConfigured(false);
   }
 
-  if (configured && !objectEndpoint) {
+  if (configured && !transcriptEndpoint) {
     console.warn(
-      'Ask Ray is not configured. Please supply the object-endpoint attribute to client extension properties.'
+      'Ask Ray is not configured. Please supply the transcript-endpoint attribute to client extension properties.'
+    );
+    setConfigured(false);
+  }
+
+  if (configured && !intentFulfilmentEndpoint) {
+    console.warn(
+        'Ask Ray is not configured. Please supply the intent-fulfilment-endpoint attribute to client extension properties.'
     );
     setConfigured(false);
   }
@@ -62,9 +71,21 @@ const AskRay = (props) => {
     setConfigured(false);
   }
 
+  if (configured && !assetLibraryId) {
+    console.info(
+      'Ask Ray will perform a site level search.'
+    );
+  } else {
+    console.info(
+      'Ask Ray will perform a asset library level search.'
+    );
+  }
+
   console.debug('dialogflowProjectId', dialogflowProjectId);
-  console.debug('objectEndpoint', objectEndpoint);
+  console.debug('transcriptEndpoint', transcriptEndpoint);
+  console.debug('intentFulfilmentEndpoint', intentFulfilmentEndpoint);
   console.debug('oauth2ClientErc', oauth2ClientErc);
+  assetLibraryId && console.debug('assetLibraryId', assetLibraryId);
 
   const signedIn = Liferay.ThemeDisplay.isSignedIn();
 
@@ -135,8 +156,10 @@ const AskRay = (props) => {
               dialogflowProjectId={dialogflowProjectId}
               dialogflowAccessToken={dialogflowAccessToken}
               dialogflowSessionId={sessionId}
-              objectEndpoint={objectEndpoint}
+              transcriptEndpoint={transcriptEndpoint}
+              intentFulfilmentEndpoint={intentFulfilmentEndpoint}
               maxEntries={maxEntries}
+              assetLibraryId={assetLibraryId}
             />
           </div>
         </>

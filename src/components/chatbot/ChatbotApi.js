@@ -16,25 +16,27 @@ import { buildObjectAPISearchParams, buildSort } from '../../common/utility';
 import { getFetch, postFetch } from '../../common/services/liferay/api';
 import { Liferay } from '../../common/services/liferay/liferay';
 import {
-  SORT_FIELD,
+  CHAT_SORT_FIELD,
+  FULFILMENT_SORT_FIELD,
   SESSION_ID_FIELD,
+  INTENT_FIELD,
   DIALOGFLOW_LANGUAGE_CODE,
   FLATTEN_PARAM,
   SEARCH_PARAM,
 } from '../../common/const';
 
-const recentConversationApi = (objectEndpoint, sessionId, maxEntries) => {
-  console.debug(`Param objectEndpoint=${objectEndpoint}`);
+const recentConversationApi = (transcriptEndpoint, sessionId, maxEntries) => {
+  console.debug(`Param transcriptEndpoint=${transcriptEndpoint}`);
   console.debug(`Param maxEntries=${maxEntries}`);
 
-  const API_PATH = `${window.location.origin}/o/c/${objectEndpoint}`;
+  const API_PATH = `${window.location.origin}/o/c/${transcriptEndpoint}`;
   const actualMaxEntries =
     maxEntries && typeof maxEntries === 'number' ? maxEntries : 7;
 
   console.debug(`Using maxEntries=${actualMaxEntries}`);
 
   const filter = `${SESSION_ID_FIELD} eq '${sessionId}'`;
-  const sort = buildSort(SORT_FIELD, false);
+  const sort = buildSort(CHAT_SORT_FIELD, false);
   const searchParams = buildObjectAPISearchParams(
     filter,
     1,
@@ -45,10 +47,10 @@ const recentConversationApi = (objectEndpoint, sessionId, maxEntries) => {
   return getFetch(API_PATH, searchParams);
 };
 
-const recordQuery = (objectEndpoint, sessionId, query) => {
-  console.debug(`Param objectEndpoint=${objectEndpoint}`);
+const recordQuery = (transcriptEndpoint, sessionId, query) => {
+  console.debug(`Param transcriptEndpoint=${transcriptEndpoint}`);
 
-  const API_PATH = `${window.location.origin}/o/c/${objectEndpoint}`;
+  const API_PATH = `${window.location.origin}/o/c/${transcriptEndpoint}`;
 
   const payload = {
     type: 'query',
@@ -59,11 +61,11 @@ const recordQuery = (objectEndpoint, sessionId, query) => {
   return postFetch(API_PATH, payload);
 };
 
-const recordResponse = (objectEndpoint, sessionId, queryResult) => {
-  console.debug(`Param objectEndpoint=${objectEndpoint}`);
+const recordResponse = (transcriptEndpoint, sessionId, queryResult) => {
+  console.debug(`Param transcriptEndpoint=${transcriptEndpoint}`);
   console.debug(`Param queryResult=${queryResult}`);
 
-  const API_PATH = `${window.location.origin}/o/c/${objectEndpoint}`;
+  const API_PATH = `${window.location.origin}/o/c/${transcriptEndpoint}`;
 
   const fulfillmentMessageCount = queryResult.fulfillmentMessages.length;
 
@@ -109,7 +111,17 @@ const callDialogflow = async (
   return await response.json();
 };
 
-const performLiferaySearch = (searchPhrase) => {
+const performAssetLibraryLiferaySearch = (searchPhrase, assetLibraryId) => {
+  const API_PATH = `${window.location.origin}/o/headless-delivery/v1.0/asset-libraries/${assetLibraryId}/structured-contents`;
+
+  const searchParams = new URLSearchParams();
+  searchParams.append(FLATTEN_PARAM, true);
+  searchParams.append(SEARCH_PARAM, searchPhrase);
+
+  return getFetch(API_PATH, searchParams);
+};
+
+const performSiteLevelLiferaySearch = (searchPhrase) => {
   const groupId = Liferay.ThemeDisplay.getSiteGroupId();
   const API_PATH = `${window.location.origin}/o/headless-delivery/v1.0/sites/${groupId}/structured-contents`;
 
@@ -120,10 +132,34 @@ const performLiferaySearch = (searchPhrase) => {
   return getFetch(API_PATH, searchParams);
 };
 
+const retrieveIntentFulfilment = (intentFulfilmentEndpoint, intent, maxEntries) => {
+  console.debug(`Param intentFulfilmentEndpoint=${intentFulfilmentEndpoint}`);
+  console.debug(`Param intent=${intent}`);
+
+  const API_PATH = `${window.location.origin}/o/c/${intentFulfilmentEndpoint}`;
+  const actualMaxEntries =
+      maxEntries && typeof maxEntries === 'number' ? maxEntries : 7;
+
+  console.debug(`Using maxEntries=${actualMaxEntries}`);
+
+  const filter = `${INTENT_FIELD} eq '${intent}'`;
+  const sort = buildSort(FULFILMENT_SORT_FIELD, false);
+  const searchParams = buildObjectAPISearchParams(
+      filter,
+      1,
+      actualMaxEntries,
+      sort
+  );
+
+  return getFetch(API_PATH, searchParams);
+};
+
 export {
   recentConversationApi,
   recordQuery,
   recordResponse,
   callDialogflow,
-  performLiferaySearch,
+  performAssetLibraryLiferaySearch,
+  performSiteLevelLiferaySearch,
+  retrieveIntentFulfilment
 };
